@@ -25,12 +25,8 @@ interface Announcement {
   description: string;
   image?: any;
   icon: string;
-  iconColor: string;
   label: string;
-  labelColor: string;
   linkText: string;
-  linkUrl: string;
-  order: number;
 }
 
 export function Home() {
@@ -40,18 +36,14 @@ export function Home() {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const query = `*[_type == "announcement" && isActive == true] | order(order asc)[0...3] {
+        const query = `*[_type == "announcement" && isActive == true] | order(_createdAt desc)[0...6] {
           _id,
           title,
           description,
           image,
           icon,
-          iconColor,
           label,
-          labelColor,
-          linkText,
-          linkUrl,
-          order
+          linkText
         }`;
         
         const data = await client.fetch(query);
@@ -252,42 +244,54 @@ export function Home() {
               <p className="mt-4">Loading announcements...</p>
             </div>
           ) : announcements.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {announcements.map((announcement) => {
-                const IconComponent = iconMap[announcement.icon as keyof typeof iconMap] || Users;
-                
-                return (
-                  <div key={announcement._id} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:bg-white/15 transition-all">
-                    {/* Optional Image */}
-                    {announcement.image && (
-                      <div className="w-full h-48 overflow-hidden">
-                        <img 
-                          src={urlFor(announcement.image).width(600).height(400).url()} 
-                          alt={announcement.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="p-8">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={`w-12 h-12 ${announcement.iconColor} rounded-xl flex items-center justify-center`}>
-                          <IconComponent className="w-6 h-6 text-white" />
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {announcements.map((announcement, index) => {
+                  const IconComponent = iconMap[announcement.icon as keyof typeof iconMap] || Users;
+                  
+                  // Cycle through colors
+                  const colors = [
+                    { bg: 'bg-cyan-500', text: 'text-cyan-300' },
+                    { bg: 'bg-indigo-500', text: 'text-indigo-300' },
+                    { bg: 'bg-blue-500', text: 'text-blue-300' },
+                    { bg: 'bg-purple-500', text: 'text-purple-300' },
+                  ];
+                  const colorIndex = index % colors.length;
+                  const color = colors[colorIndex];
+                  
+                  return (
+                    <div key={announcement._id} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden hover:bg-white/15 transition-all">
+                      {/* Optional Image */}
+                      {announcement.image && (
+                        <div className="w-full h-48 overflow-hidden">
+                          <img 
+                            src={urlFor(announcement.image).width(600).height(400).url()} 
+                            alt={announcement.title}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <span className={`${announcement.labelColor} text-sm`}>{announcement.label}</span>
+                      )}
+                      
+                      <div className="p-8">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className={`w-12 h-12 ${color.bg} rounded-xl flex items-center justify-center`}>
+                            <IconComponent className="w-6 h-6 text-white" />
+                          </div>
+                          <span className={`${color.text} text-sm`}>{announcement.label}</span>
+                        </div>
+                        <h3 className="text-white mb-3">{announcement.title}</h3>
+                        <p className="text-gray-200 mb-4">
+                          {announcement.description}
+                        </p>
+                        <a href="/events" className={`${color.text} hover:opacity-80 inline-flex items-center gap-2 transition-colors`}>
+                          {announcement.linkText}
+                          <ArrowRight className="w-4 h-4" />
+                        </a>
                       </div>
-                      <h3 className="text-white mb-3">{announcement.title}</h3>
-                      <p className="text-gray-200 mb-4">
-                        {announcement.description}
-                      </p>
-                      <a href={announcement.linkUrl} className={`${announcement.labelColor} hover:opacity-80 inline-flex items-center gap-2 transition-colors`}>
-                        {announcement.linkText}
-                        <ArrowRight className="w-4 h-4" />
-                      </a>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <div className="text-center text-white">

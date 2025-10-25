@@ -27,7 +27,7 @@ function Router() {
     '/ministries': <Ministries />,
     '/events': <Events />,
     '/sermons': <Sermons />,
-    '/gallery': <Gallery />,
+    '/gallery': <Gallery />,  
     '/give': <Give />,
     '/contact': <Contact />,
   };

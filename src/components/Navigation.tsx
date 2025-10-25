@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Menu, X, Church, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, Church } from 'lucide-react';
 
 const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
   { name: 'Ministries', href: '/ministries' },
   { name: 'Events', href: '/events' },
-  { name: 'Sermons', href: '/sermons' },
+  // { name: 'Sermons', href: '/sermons' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Give', href: '/give' },
   { name: 'Contact', href: '/contact' },
@@ -14,7 +14,14 @@ const navLinks = [
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const currentPath = window.location.pathname;
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  // ✅ Keep currentPath in sync with navigation
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -29,8 +36,8 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <a 
-            href="/" 
+          <a
+            href="/"
             className="flex items-center gap-3 group"
             onClick={(e) => handleNavClick(e, '/')}
           >

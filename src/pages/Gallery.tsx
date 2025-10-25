@@ -1,89 +1,62 @@
-import { useState } from 'react';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useState, useEffect } from 'react';
+import { client } from '../lib/sanity';
+import imageUrlBuilder from '@sanity/image-url';
 
-const galleryImages = [
-  {
-    id: 1,
-    src: 'https://images.unsplash.com/photo-1667068114508-0055f7fb25a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjB3b3JzaGlwJTIwaGFuZHMlMjByYWlzZWR8ZW58MXx8fHwxNzYwNzk2ODY0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Worship service with hands raised in praise',
-    category: 'Worship',
-  },
-  {
-    id: 2,
-    src: 'https://images.unsplash.com/photo-1717201611909-0f75ee9b0b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwY2h1cmNoJTIwY29uZ3JlZ2F0aW9ufGVufDF8fHx8MTc2MDg1ODg4Mnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Church congregation gathered for service',
-    category: 'Service',
-  },
-  {
-    id: 3,
-    src: 'https://images.unsplash.com/photo-1745852737245-66453f2a6f3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBjaG9pciUyMHNpbmdpbmd8ZW58MXx8fHwxNzYwNzk3MjUzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Church choir singing during worship',
-    category: 'Worship',
-  },
-  {
-    id: 4,
-    src: 'https://images.unsplash.com/photo-1711157771635-b3bdd677491c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3V0aCUyMGdyb3VwJTIwcHJheWluZ3xlbnwxfHx8fDE3NjA4NTg4ODN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Youth group praying together',
-    category: 'Youth',
-  },
-  {
-    id: 5,
-    src: 'https://images.unsplash.com/photo-1713012633197-1426a345ca99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMHN1bmRheSUyMHNjaG9vbHxlbnwxfHx8fDE3NjA3ODg4NDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Children in Sunday school learning about Jesus',
-    category: 'Children',
-  },
-  {
-    id: 6,
-    src: 'https://images.unsplash.com/photo-1569292567777-e5d61a759322?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBmZWxsb3dzaGlwJTIwY29tbXVuaXR5fGVufDF8fHx8MTc2MDg1ODg4NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Church fellowship and community gathering',
-    category: 'Fellowship',
-  },
-  {
-    id: 7,
-    src: 'https://images.unsplash.com/photo-1700936206635-c8b06c1928ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21lbiUyMHByYXllciUyMGdyb3VwfGVufDF8fHx8MTc2MDg1ODg4NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Women prayer group meeting',
-    category: 'Fellowship',
-  },
-  {
-    id: 8,
-    src: 'https://images.unsplash.com/photo-1649701920167-38c5ee92a34c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBidWlsZGluZyUyMGV4dGVyaW9yfGVufDF8fHx8MTc2MDg1ODg4NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Church building exterior',
-    category: 'Building',
-  },
-  {
-    id: 9,
-    src: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiaWJsZSUyMHN0dWR5JTIwZ3JvdXB8ZW58MXx8fHwxNzYwODU4ODg1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Bible study group discussion',
-    category: 'Fellowship',
-  },
-  {
-    id: 10,
-    src: 'https://images.unsplash.com/photo-1760319726429-fcda77d3cb05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBjb21tdW5pdHklMjBnYXRoZXJpbmd8ZW58MXx8fHwxNzYwNzg1ODAzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Church community gathering event',
-    category: 'Events',
-  },
-  {
-    id: 11,
-    src: 'https://images.unsplash.com/photo-1672237983944-eec248019fb2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjaHVyY2glMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjA3NjAzMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Modern church interior',
-    category: 'Building',
-  },
-  {
-    id: 12,
-    src: 'https://images.unsplash.com/photo-1610414961792-b7fffebddd14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0b3IlMjBwcmVhY2hpbmd8ZW58MXx8fHwxNzYwNzg1NjQyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    alt: 'Pastor preaching from pulpit',
-    category: 'Service',
-  },
-];
+// Image URL builder
+const builder = imageUrlBuilder(client);
+function urlFor(source: any) {
+  return builder.image(source);
+}
 
-const categories = ['All', 'Worship', 'Service', 'Youth', 'Children', 'Fellowship', 'Building', 'Events'];
+interface GalleryImage {
+  _id: string;
+  image: any;
+  title: string;
+  caption?: string;
+  category: string;
+}
 
 export function Gallery() {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const query = `*[_type == "galleryImage" && isActive == true] | order(_createdAt desc) {
+          _id,
+          image,
+          title,
+          caption,
+          category
+        }`;
+        
+        const data = await client.fetch(query);
+        setImages(data);
+      } catch (error) {
+        console.error('Error fetching gallery images:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
+  // All available categories (always show these)
+  const allCategories = ['All', 'Worship', 'Service', 'Youth', 'Children', 'Fellowship', 'Building', 'Events', 'Outreach'];
+  
+  // Count images per category
+  const getCategoryCount = (category: string) => {
+    if (category === 'All') return images.length;
+    return images.filter(img => img.category === category).length;
+  };
 
   const filteredImages = selectedCategory === 'All' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === selectedCategory);
+    ? images 
+    : images.filter(img => img.category === selectedCategory);
 
   return (
     <div className="min-h-screen">
@@ -114,19 +87,27 @@ export function Gallery() {
       <section className="py-12 bg-white sticky top-20 z-40 border-b border-orange-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-3 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2.5 rounded-xl transition-all ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg transform scale-105'
-                    : 'bg-orange-50 text-orange-800 hover:bg-orange-100'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+            {allCategories.map((category) => {
+              const count = getCategoryCount(category);
+              const isEmpty = count === 0;
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => !isEmpty && setSelectedCategory(category)}
+                  disabled={isEmpty}
+                  className={`px-6 py-2.5 rounded-xl transition-all ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg transform scale-105'
+                      : isEmpty
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-orange-50 text-orange-800 hover:bg-orange-100'
+                  }`}
+                >
+                  {category}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -134,29 +115,98 @@ export function Gallery() {
       {/* Gallery Grid */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredImages.map((image) => (
-              <div
-                key={image.id}
-                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[4/3]"
-              >
-                <ImageWithFallback
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/90 via-orange-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
-                      {image.category}
-                    </span>
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
+              <p className="mt-4 text-gray-600">Loading gallery...</p>
+            </div>
+          ) : filteredImages.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredImages.map((image) => (
+                <div
+                  key={image._id}
+                  onClick={() => setSelectedImage(image)}
+                  className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[4/3] cursor-pointer"
+                >
+                  <img
+                    src={urlFor(image.image).width(800).height(600).url()}
+                    alt={image.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-orange-900/90 via-orange-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-600 text-white px-4 py-1.5 rounded-full text-sm shadow-lg mb-2">
+                        {image.category}
+                      </span>
+                      <h3 className="text-white font-semibold text-lg">{image.title}</h3>
+                      {image.caption && (
+                        <p className="text-gray-200 text-sm mt-1 line-clamp-2">{image.caption}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-gray-500 text-lg">
+                {selectedCategory === 'All' 
+                  ? 'No images yet'
+                  : `No images in ${selectedCategory}`
+                }
+              </p>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setSelectedImage(null)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-md border border-white/20"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          <div 
+            className="relative w-full max-w-5xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image container with fixed max height */}
+            <div className="relative bg-gradient-to-br from-orange-900/20 to-amber-900/20 rounded-t-2xl overflow-hidden border-x border-t border-white/10">
+              <img
+                src={urlFor(selectedImage.image).width(1400).height(1000).url()}
+                alt={selectedImage.title}
+                className="w-full max-h-[65vh] object-contain"
+              />
+            </div>
+            
+            {/* Info section */}
+            <div className="bg-white rounded-b-2xl p-6 sm:p-8 border-x border-b border-orange-100">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
+                <h3 className="text-2xl sm:text-3xl text-orange-900 font-bold">{selectedImage.title}</h3>
+                <span className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow-lg shrink-0">
+                  {selectedImage.category}
+                </span>
+              </div>
+              {selectedImage.caption && (
+                <p className="text-gray-700 text-lg leading-relaxed">{selectedImage.caption}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Social CTA */}
       <section className="py-24 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50">
